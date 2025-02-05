@@ -1,9 +1,11 @@
-from typing import AsyncGenerator
+from __future__ import annotations
 
 import os
-import pytest
+from typing import AsyncGenerator
 
+import pytest
 from bson import ObjectId
+
 from sqlitestorage.storage import SQLiteStorage
 
 
