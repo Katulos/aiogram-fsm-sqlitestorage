@@ -44,7 +44,19 @@ repos:
             "-o",
             "requirements-dev.txt",
           ]
-
+      - id: poetry-export
+        name: Export requirements-test.txt
+        args:
+          [
+            "--no-cache",
+            "--without-hashes",
+            "--with",
+            "test",
+            "-f",
+            "requirements.txt",
+            "-o",
+            "requirements-test.txt",
+          ]
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.30.0
     hooks:
