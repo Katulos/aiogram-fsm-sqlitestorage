@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from aiogram.dispatcher.storage import BaseStorage
+from aiogram.fsm.storage.base import BaseStorage
 
 
 async def test_set_get(
