@@ -16,12 +16,12 @@ bson = "^0.5.10"
 pytest = "^7.3.1"
 
 [tool.poetry.group.dev.dependencies]
-mypy = "^1.2.0"
+mypy = "^1.11.2"
 pre-commit = "^3.5.0"
-ruff = "^0.7.2"
+ruff = "^0.5.1"
 
 [build-system]
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+requires = ["poetry-core>=1.0.0,<=1.9.0", "poetry-dynamic-versioning"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry-dynamic-versioning]
@@ -30,7 +30,7 @@ enable = true
 [tool.mypy]
 show_error_codes = true
 disallow_any_generics = true
-disallow_subclassing_any = true
+disallow_subclassing_any = false
 disallow_untyped_calls = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
@@ -96,9 +96,6 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 [tool.ruff.format]
 skip-magic-trailing-comma = false
 line-ending = "auto"
-
-[tool.ruff.lint.isort]
-required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 10

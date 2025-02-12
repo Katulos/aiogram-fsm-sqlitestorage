@@ -109,7 +109,8 @@ repos:
     rev: v1.11.2
     hooks:
       - id: mypy
-        args: [--ignore-missing-imports, --exclude=example.py]
+        args:
+          [--ignore-missing-imports, --exclude=example.py, --python-version=3.8]
   - repo: https://github.com/asottile/add-trailing-comma
     rev: v2.3.0
     hooks:
