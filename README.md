@@ -10,10 +10,9 @@ Implements just [basic BaseStorage methods](https://docs.aiogram.dev/en/dev-3.x/
 - get_state()
 - set_data()
 - get_data()
-- update_data()
 - close()
 
-Tests are based on [original aiogram tests](https://github.com/aiogram/aiogram/blob/master/tests/test_contrib/test_fsm_storage/test_storage.py).
+Tests are based on [original aiogram tests v3.13.1](https://github.com/aiogram/aiogram/blob/v3.13.1/tests/test_contrib/test_fsm_storage/test_storage.py).
 
 ## Installation
 

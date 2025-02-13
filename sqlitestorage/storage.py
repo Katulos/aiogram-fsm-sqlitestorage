@@ -1,11 +1,12 @@
-from __future__ import annotations
-
 import json
+import logging
 import sqlite3
-import typing
-from typing import Any
+from typing import Any, Dict, Optional, Tuple, Union
 
-from aiogram.fsm.storage.base import BaseStorage, StorageKey
+from aiogram.fsm.state import State
+from aiogram.fsm.storage.base import BaseStorage, StateType, StorageKey
+
+logging.basicConfig(level=logging.INFO)
 
 
 class SQLiteStorage(BaseStorage):
@@ -15,64 +16,12 @@ class SQLiteStorage(BaseStorage):
     between bot restarts.
     """
 
-    async def update_data(
-        self,
-        *,
-        key: StorageKey,
-        data: dict[Any, Any] | None = None,
-        **kwargs: Any,
-    ) -> None:
-        existing_data = await self.get_data(key=key)
-        if data:
-            existing_data.update(data)
-        existing_data.update(**kwargs)
-
-        conn = self._get_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            INSERT OR REPLACE INTO fsm_data (key, state, data)
-            VALUES (?, COALESCE((SELECT state FROM fsm_data WHERE key = ?), '{}'), ?)
-        """,
-            (
-                str(key.chat_id) + ":" + str(key.user_id),
-                str(key.chat_id) + ":" + str(key.user_id),
-                json.dumps(existing_data),
-            ),
-        )
-        conn.commit()
-
-    async def update_bucket(
-        self,
-        *,
-        key: StorageKey,
-        bucket: dict | None = None,
-        **kwargs,
-    ):
-        pass
-
-    async def set_bucket(
-        self,
-        *,
-        key: StorageKey,
-        bucket: dict | None = None,
-    ) -> None:
-        pass
-
-    async def get_bucket(
-        self,
-        *,
-        key: StorageKey,
-        default: dict | None | None = None,
-    ) -> dict | None:
-        pass
-
     def __init__(self, db_path: str = "fsm_storage.db"):
-        self.db_path = db_path
-        self._conn = None
+        self.db_path: str = db_path
+        self._conn: Optional[sqlite3.Connection] = None
         self._init_db()
 
-    def _init_db(self):
+    def _init_db(self) -> None:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute(
@@ -87,147 +36,142 @@ class SQLiteStorage(BaseStorage):
         conn.commit()
         conn.close()
 
-    def _get_connection(self):
+    def _get_connection(self) -> Optional[Union[sqlite3.Connection, None]]:
         if self._conn is None:
-            self._conn = sqlite3.connect(self.db_path)
+            try:
+                self._conn = sqlite3.connect(self.db_path)
+            except sqlite3.Error:
+                return None
         return self._conn
-
-    async def close(self) -> None:
-        if self._conn is not None:
-            self._conn.close()
-            self._conn = None
-
-    async def wait_closed(self) -> None:
-        pass
 
     async def set_state(
         self,
-        *,
         key: StorageKey,
-        state: typing.AnyStr | None = None,
-        **kwargs,
-    ):
+        state: StateType = None,
+    ) -> None:
         conn = self._get_connection()
-        cursor = conn.cursor()
-        # print('Set state')
-        # print(f'chat: {chat}')
-        # print(f'user: {user}')
-        # print(f'state: {self.resolve_state(state)}')
-        cursor.execute(
-            """
-            INSERT OR REPLACE INTO fsm_data
-            (key, state, data)
-            VALUES (?, ?, COALESCE((SELECT data FROM fsm_data WHERE key = ?), '{}'))
-        """,
-            (
-                str(key.chat_id) + ":" + str(key.user_id),
-                self.resolve_state(state),
-                str(key.chat_id) + ":" + str(key.user_id),
-            ),
+        if conn is None:
+            raise RuntimeError(
+                "The connection to the database was not established.",
+            )
+        key_str = f"{key.chat_id}:{key.user_id}"
+        resolved_state = self.resolve_state(
+            state,
         )
-        conn.commit()
 
-    async def get_state(
-        self,
-        *,
-        key: StorageKey,
-        default: str | None = None,
-    ) -> typing.Coroutine[Any, Any, str | None]:
+        try:
+            with conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    """
+                    INSERT OR REPLACE INTO fsm_data
+                    (key, state, data)
+                    VALUES (?, ?, COALESCE((SELECT data FROM fsm_data WHERE key = ?), '{}'))
+                    """,
+                    (key_str, resolved_state, key_str),
+                )
+        except sqlite3.Error as e:
+            raise RuntimeError(f"Error executing query: {e}") from e
+
+    async def get_state(self, key: StorageKey) -> Optional[str]:
         conn = self._get_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            "SELECT state FROM fsm_data WHERE key = ?",
-            (str(key.chat_id) + ":" + str(key.user_id),),
-        )
-        result = cursor.fetchone()
-        # print('Get state')
-        # print(f'chat: {chat}')
-        # print(f'user: {user}')
-        # print(f'raw state: {result[0]}')
-        # print(f'resolved state: {self.resolve_state(result[0])}')
-        if result:
-            pass
-        else:
-            pass
-        if result and len(result[0]) > 0:
-            state = result[0]
-        else:
-            state = None
-        # print(f'result: {what}')
-        # print(f'state: {state}')
+        if conn is None:
+            raise RuntimeError(
+                "The connection to the database was not established.",
+            )
+
+        try:
+            with conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT state FROM fsm_data WHERE key = ?",
+                    (f"{key.chat_id}:{key.user_id}",),
+                )
+                result: Optional[Tuple[Any, ...]] = cursor.fetchone()
+                state: Optional[str] = (
+                    result[0] if result and result[0] else None
+                )
+        except sqlite3.Error as e:
+            raise RuntimeError(f"Error executing query: {e}") from e
+
         return state
 
     async def set_data(
         self,
-        *,
         key: StorageKey,
-        data: dict | None = None,
-    ):
+        data: Dict[str, Any],
+    ) -> None:
         conn = self._get_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            INSERT OR REPLACE INTO fsm_data (key, state, data)
-            VALUES (?, COALESCE((SELECT state FROM fsm_data WHERE key = ?), ''), ?)
-        """,
-            (
-                str(key.chat_id) + ":" + str(key.user_id),
-                str(key.chat_id) + ":" + str(key.user_id),
-                json.dumps(data),
-            ),
-        )
-        conn.commit()
+        if conn is None:
+            raise RuntimeError(
+                "The connection to the database was not established.",
+            )
 
-    async def get_data(
-        self,
-        *,
-        key: StorageKey,
-        default: dict | None = None,
-    ) -> dict:
+        key_str = f"{key.chat_id}:{key.user_id}"
+        data_json = json.dumps(data)
+
+        try:
+            with conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    """
+                    INSERT OR REPLACE INTO fsm_data (key, state, data)
+                    VALUES (?, COALESCE((SELECT state FROM fsm_data WHERE key = ?), ''), ?)
+                    """,
+                    (key_str, key_str, data_json),
+                )
+        except sqlite3.Error as e:
+            raise RuntimeError(f"Error executing query: {e}") from e
+
+    async def get_data(self, key: StorageKey) -> Dict[str, Any]:
         conn = self._get_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            "SELECT data FROM fsm_data WHERE key = ?",
-            (str(key.chat_id) + ":" + str(key.user_id),),
-        )
-        result = cursor.fetchone()
-        return json.loads(result[0]) if result else {}
+        if conn is None:
+            raise RuntimeError(
+                "The connection to the database was not established.",
+            )
 
-    async def reset_data(
-        self,
-        *,
-        key: StorageKey,
-    ):
-        await self.set_data(key=key, data={})
+        key_str = f"{key.chat_id}:{key.user_id}"
 
-    async def reset_state(
-        self,
-        *,
-        key: StorageKey,
-        with_data: bool | None = True,
-    ):
-        #        await self.set_state(chat=chat, user=user, state=None)
-        #        if with_data:
-        #            await self.set_data(chat=chat, user=user, data={})
-        self._cleanup(key)
+        try:
+            with conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT data FROM fsm_data WHERE key = ?",
+                    (key_str,),
+                )
+                result: Optional[Tuple[Any, ...]] = cursor.fetchone()
+        except sqlite3.Error as e:
+            raise RuntimeError(f"Error executing query: {e}") from e
 
-    def _cleanup(self, key):
-        #        chat, user = self.resolve_address(chat=chat, user=user)
-        #        if self.get_state(chat=chat, user=user) == None:
+        if result:
+            data = json.loads(result[0])
+            if isinstance(data, dict):
+                return data
+        return {}
+
+    async def close(self) -> None:
+        if self._conn is not None:
+            try:
+                self._conn.close()
+            finally:
+                self._conn = None
+
+    async def wait_closed(self) -> bool:
         conn = self._get_connection()
-        cursor = conn.cursor()
-        cursor.execute(
-            "DELETE FROM fsm_data WHERE key = ?",
-            (str(key.chat_id) + ":" + str(key.user_id),),
-        )
-        conn.commit()
+        if conn is None:
+            return True
+        try:
+            conn.execute("SELECT 1")
+            return False
+        except sqlite3.ProgrammingError:
+            return True
 
     @staticmethod
-    def resolve_state(value):
-        from aiogram.filters.state import State
-
+    def resolve_state(
+        value: Optional[Union[str, State, None]],
+    ) -> Optional[Union[str, State, None]]:
         if value is None:
-            return
+            return None
 
         if isinstance(value, str):
             return value

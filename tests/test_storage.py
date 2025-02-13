@@ -1,32 +1,62 @@
-from __future__ import annotations
-
-from aiogram.dispatcher.storage import BaseStorage
+from aiogram.fsm.storage.base import BaseStorage, StorageKey
 
 
-async def test_set_get(
+async def test_set_state(
     storage: BaseStorage,
+    storage_key: StorageKey,
 ) -> None:
-    assert await storage.get_data() == {}
-    await storage.set_data(data={"foo": "bar"})
-    assert await storage.get_data() == {"foo": "bar"}
+    assert await storage.get_state(key=storage_key) is None
+
+    await storage.set_state(key=storage_key, state="state")
+    assert await storage.get_state(key=storage_key) == "state"
+    await storage.set_state(key=storage_key, state=None)
+    assert await storage.get_state(key=storage_key) is None
 
 
-async def test_reset(
+async def test_set_data(
     storage: BaseStorage,
+    storage_key: StorageKey,
 ) -> None:
-    await storage.set_data(data={"foo": "bar"})
-    await storage.set_state(state="SECOND")
+    assert await storage.get_data(key=storage_key) == {}
 
-    await storage.reset_data()
-    assert await storage.get_state() == "SECOND"
-    await storage.set_data(data={"foo": "bar"})
-
-    await storage.reset_state()
-    assert await storage.get_data() == {"foo": "bar"}
+    await storage.set_data(key=storage_key, data={"foo": "bar"})
+    assert await storage.get_data(key=storage_key) == {"foo": "bar"}
+    await storage.set_data(key=storage_key, data={})
+    assert await storage.get_data(key=storage_key) == {}
 
 
-async def test_reset_empty(
+async def test_update_data(
     storage: BaseStorage,
+    storage_key: StorageKey,
 ) -> None:
-    await storage.reset_data()
-    assert await storage.get_data() == {}
+    assert await storage.get_data(key=storage_key) == {}
+    assert await storage.update_data(
+        key=storage_key,
+        data={"foo": "bar"},
+    ) == {"foo": "bar"}
+    assert await storage.update_data(key=storage_key, data={}) == {
+        "foo": "bar",
+    }
+    assert await storage.get_data(key=storage_key) == {"foo": "bar"}
+    assert await storage.update_data(
+        key=storage_key,
+        data={"baz": "spam"},
+    ) == {
+        "foo": "bar",
+        "baz": "spam",
+    }
+    assert await storage.get_data(key=storage_key) == {
+        "foo": "bar",
+        "baz": "spam",
+    }
+    assert await storage.update_data(
+        key=storage_key,
+        data={"baz": "test"},
+    ) == {
+        "foo": "bar",
+        "baz": "test",
+    }
+    assert await storage.get_data(key=storage_key) == {
+        "foo": "bar",
+        "baz": "test",
+    }

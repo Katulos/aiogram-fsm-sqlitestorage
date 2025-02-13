@@ -180,3 +180,5 @@ data/*
 !data/.gitkeep
 /config.yaml
 /old_code
+/*.db
+/examples/*.db
