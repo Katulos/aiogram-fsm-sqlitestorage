@@ -2,7 +2,8 @@ from aiogram.fsm.storage.base import BaseStorage, StorageKey
 
 
 async def test_set_state(
-    storage: BaseStorage, storage_key: StorageKey
+    storage: BaseStorage,
+    storage_key: StorageKey,
 ) -> None:
     assert await storage.get_state(key=storage_key) is None
 
@@ -13,7 +14,8 @@ async def test_set_state(
 
 
 async def test_set_data(
-    storage: BaseStorage, storage_key: StorageKey
+    storage: BaseStorage,
+    storage_key: StorageKey,
 ) -> None:
     assert await storage.get_data(key=storage_key) == {}
 
@@ -24,18 +26,21 @@ async def test_set_data(
 
 
 async def test_update_data(
-    storage: BaseStorage, storage_key: StorageKey
+    storage: BaseStorage,
+    storage_key: StorageKey,
 ) -> None:
     assert await storage.get_data(key=storage_key) == {}
     assert await storage.update_data(
-        key=storage_key, data={"foo": "bar"}
+        key=storage_key,
+        data={"foo": "bar"},
     ) == {"foo": "bar"}
     assert await storage.update_data(key=storage_key, data={}) == {
-        "foo": "bar"
+        "foo": "bar",
     }
     assert await storage.get_data(key=storage_key) == {"foo": "bar"}
     assert await storage.update_data(
-        key=storage_key, data={"baz": "spam"}
+        key=storage_key,
+        data={"baz": "spam"},
     ) == {
         "foo": "bar",
         "baz": "spam",
@@ -45,7 +50,8 @@ async def test_update_data(
         "baz": "spam",
     }
     assert await storage.update_data(
-        key=storage_key, data={"baz": "test"}
+        key=storage_key,
+        data={"baz": "test"},
     ) == {
         "foo": "bar",
         "baz": "test",

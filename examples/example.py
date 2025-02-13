@@ -26,8 +26,11 @@ class Phase(StatesGroup):
     FIN = State()
 
 
-@router.message(F.text.startswith("Get values"), Phase.SECOND) # type: ignore
-async def get_value_phase_second(message: types.Message, state: FSMContext) -> None:
+@router.message(F.text.startswith("Get values"), Phase.SECOND)  # type: ignore
+async def get_value_phase_second(
+    message: types.Message,
+    state: FSMContext,
+) -> None:
     current_state = await state.get_state()
     await message.answer(f"State is {current_state}")
 
@@ -41,8 +44,11 @@ async def get_value_phase_second(message: types.Message, state: FSMContext) -> N
     await state.set_state(Phase.FIN)
 
 
-@router.message(Phase.FIN) # type: ignore
-async def get_value_phase_fin(message: types.Message, state: FSMContext) -> None:
+@router.message(Phase.FIN)  # type: ignore
+async def get_value_phase_fin(
+    message: types.Message,
+    state: FSMContext,
+) -> None:
     await message.answer(f"State is {await state.get_state()}")
     if message.text == "/start":
         await state.set_state(Phase.START)
@@ -50,8 +56,11 @@ async def get_value_phase_fin(message: types.Message, state: FSMContext) -> None
         await message.answer("Good bye!")
 
 
-@router.message(Phase.SECOND) # type: ignore
-async def save_value_phase_second(message: types.Message, state: FSMContext) -> None:
+@router.message(Phase.SECOND)  # type: ignore
+async def save_value_phase_second(
+    message: types.Message,
+    state: FSMContext,
+) -> None:
     await message.answer(f"State is {await state.get_state()}")
     if "=" not in message.text:
         await message.answer("Enter pair of args in format: <key>=<values>")
@@ -71,8 +80,11 @@ async def save_value_phase_second(message: types.Message, state: FSMContext) -> 
     await state.set_state(Phase.SECOND)
 
 
-@router.message() # type: ignore
-async def save_value_phase_all(message: types.Message, state: FSMContext) -> None:
+@router.message()  # type: ignore
+async def save_value_phase_all(
+    message: types.Message,
+    state: FSMContext,
+) -> None:
     await message.answer(f"State is {await state.get_state()}")
     if "=" not in message.text:
         await message.answer("Enter pair of args in format: <key>=<values>")
@@ -100,7 +112,7 @@ async def shutdown(
     logging.info("Storage is closed!")
 
 
-def main()  -> None:
+def main() -> None:
     dp = Dispatcher(storage=SQLiteStorage())
     bot = Bot(
         token=API_TOKEN,

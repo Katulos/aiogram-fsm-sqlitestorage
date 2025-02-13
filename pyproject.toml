@@ -2,7 +2,11 @@
 name = "sqlitestorage"
 version = "0.1.0"
 description = ""
-authors = ["Alex <alex.blednov@gmail.com>", "Katulos <katulos@protonmail.com>"]
+authors = [
+    "dimonier <dimonier@gmail.com>", # Original author
+    "Alex <alex.blednov@gmail.com>", # Original author
+    "Katulos <katulos@protonmail.com>"
+]
 readme = "README.md"
 
 [tool.poetry.dependencies]
