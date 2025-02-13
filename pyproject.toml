@@ -46,7 +46,7 @@ namespace_packages = true
 explicit_package_bases = true
 
 [tool.ruff]
-exclude = ["*.pyi", ".tox", ".git", "venv", ".venv", "example.py"]
+exclude = ["*.pyi", ".tox", ".git", "venv", ".venv"]
 line-length = 78
 indent-width = 4
 target-version = 'py38'

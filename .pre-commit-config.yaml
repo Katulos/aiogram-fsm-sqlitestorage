@@ -110,7 +110,7 @@ repos:
     hooks:
       - id: mypy
         args:
-          [--ignore-missing-imports, --exclude=example.py, --python-version=3.8]
+          ["--ignore-missing-imports", "--python-version=3.8"]
   - repo: https://github.com/asottile/add-trailing-comma
     rev: v2.3.0
     hooks:
@@ -120,6 +120,6 @@ repos:
     rev: v0.5.1
     hooks:
       - id: ruff
-        args: [--fix, --config=pyproject.toml]
+        args: ["--fix", "--config=pyproject.toml"]
       - id: ruff-format
-        args: [--config=pyproject.toml]
+        args: ["--config=pyproject.toml"]
