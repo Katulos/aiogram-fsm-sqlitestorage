@@ -16,7 +16,7 @@ async def storage() -> AsyncGenerator[SQLiteStorage, None]:
         yield database
     finally:
         await database.close()
-        # await database.wait_closed() #raise PermissionError
+        # await database.wait_closed() # raise PermissionError
         os.remove(db_filename)
 
 
