@@ -1,4 +1,18 @@
-# SQLiteStorage
+# Yet Another FSM SQLite Storage
+
+![PyPI - Wheel](https://img.shields.io/pypi/wheel/aiogram-fsm-sqlitestorage?logo=pypi)
+![PyPI - Version](https://img.shields.io/pypi/v/aiogram-fsm-sqlitestorage?logo=pypi)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/aiogram-fsm-sqlitestorage?logo=pypi)
+![PyPI - License](https://img.shields.io/pypi/l/aiogram-fsm-sqlitestorage?logo=pypi)
+![release](https://github.com/Katulos/aiogram-fsm-sqlitestorage/actions/workflows/release.yml/badge.svg)
+![develop](https://github.com/Katulos/aiogram-fsm-sqlitestorage/actions/workflows/develop.yml/badge.svg?branch=develop)
+
+> [!NOTE]
+> When it was necessary for my project, I did not find such projects as [osf4/sqlitestorage](https://github.com/osf4/sqlitestorage) or [sashaferrum/aiogram_sqlite_storage](https://github.com/sashaferrum/aiogram_sqlite_storage) :sob: and adapted [this fork](https://github.com/LehaSex/SQLiteStorage) to my needs.
+> More forks to the God of forks! :laughing:
+
+> [!CAUTION]
+> This package may conflict with the packages listed above! Be careful!
 
 Simple aiogram FSM storage, stores all FSM data in SQLite database
 
@@ -16,7 +30,9 @@ Tests are based on [original aiogram tests v3.13.1](https://github.com/aiogram/a
 
 ## Installation
 
-Copy `sqlitestorage` folder to your project.
+```bash
+pip install aiogram-fsm-sqlitestorage
+```
 
 ## Usage
 
@@ -24,7 +40,7 @@ Include the following in your script:
 
 ```python
 # import aiogram and the rest
-from sqlitestorage.storage import SQLiteStorage
+from sqlitestorage import SQLiteStorage
 
 dp = Dispatcher(bot, storage=SQLiteStorage())
 ```

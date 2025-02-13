@@ -1,13 +1,48 @@
+[build-system]
+requires = ["poetry-core>=1.2.0,<=1.9.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
+
+[project]
+dynamic = [ "classifiers", "version" ]
+
+[project.urls]
+homepage = "https://github.com/Katulos/aiogram-fsm-sqlitestorage"
+repository = "https://github.com/Katulos/aiogram-fsm-sqlitestorage"
+"Bug Tracker" = "https://github.com/Katulos/aiogram-fsm-sqlitestorage/issues"
+
 [tool.poetry]
-name = "sqlitestorage"
+name = "aiogram-fsm-sqlitestorage"
 version = "0.1.0"
-description = ""
+description = "aiogram FSM storage, stores all data in SQLite database."
+keywords = ["aiogram", "storage", "sqlite", "fsm"]
 authors = [
-    "dimonier <dimonier@gmail.com>", # Original author
     "Alex <alex.blednov@gmail.com>", # Original author
-    "Katulos <katulos@protonmail.com>"
+    "dimonier <dimonier@gmail.com>", # Original author
 ]
+maintainers = ["Katulos <katulos@protonmail.com>>"]
 readme = "README.md"
+license = "MIT"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Framework :: AsyncIO",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+packages = [
+    { include = "sqlitestorage"}
+]
+
+[tool.poetry.build]
+generate-setup-file = false
 
 [tool.poetry.dependencies]
 python = ">=3.8"
@@ -24,12 +59,10 @@ mypy = "^1.11.2"
 pre-commit = "^3.5.0"
 ruff = "^0.5.1"
 
-[build-system]
-requires = ["poetry-core>=1.0.0,<=1.9.0", "poetry-dynamic-versioning"]
-build-backend = "poetry.core.masonry.api"
-
 [tool.poetry-dynamic-versioning]
 enable = true
+vcs = "git"
+style = "semver"
 
 [tool.mypy]
 show_error_codes = true
@@ -50,7 +83,7 @@ namespace_packages = true
 explicit_package_bases = true
 
 [tool.ruff]
-exclude = ["*.pyi", ".tox", ".git", "venv", ".venv"]
+exclude = ["*.pyi", ".tox", ".git", "venv", ".venv", ".mypy_cache", ".pytest_cache", ".ruff_cache"]
 line-length = 78
 indent-width = 4
 target-version = 'py38'
