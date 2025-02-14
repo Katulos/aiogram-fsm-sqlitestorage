@@ -13,7 +13,7 @@ repository = "https://github.com/Katulos/aiogram-fsm-sqlitestorage"
 
 [tool.poetry]
 name = "aiogram-fsm-sqlitestorage"
-version = "0.0.0"
+version = "0.0.1"
 description = "aiogram FSM storage, stores all data in SQLite database."
 keywords = ["aiogram", "storage", "sqlite", "fsm"]
 authors = [
