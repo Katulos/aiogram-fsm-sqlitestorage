@@ -1,7 +1,6 @@
 name: Release
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
@@ -9,25 +8,69 @@ on:
     paths:
       - "**/*.py"
       - ".github/workflows/release.yml"
+  pull_request:
+    branches:
+      - main
+      - master
+    paths:
+      - "**/*.py"
+      - ".github/workflows/release.yml"
+  workflow_dispatch:
+
 jobs:
+  tests:
+    name: Run tests
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          make deps
+
+      - name: Run tests
+        run: |
+          make test
+
   release:
+    needs: [tests]
     name: Release
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'Katulos'
+    permissions:
+      contents: write
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Release
-        uses: cycjimmy/semantic-release-action@v3
+      - name: Python Semantic Release
+        id: release
+        uses: python-semantic-release/python-semantic-release@v9.19
         with:
-          semantic_version: 18
-          extra_plugins: |
-            @semantic-release/changelog
-            @semantic-release/git
-            conventional-changelog-conventionalcommits
-        env:
-          GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+          github_token: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+
+      - name: Publish package distributions to GitHub Releases
+        uses: python-semantic-release/publish-action@v9.19
+        if: steps.release.outputs.released == 'true'
+        with:
+          github_token: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+
+      - name: Publish distribution to PyPI
+        if: steps.release.outputs.released == 'true'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository-url: https://test.pypi.org/legacy/

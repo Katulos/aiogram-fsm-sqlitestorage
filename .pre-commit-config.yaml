@@ -1,6 +1,7 @@
 ---
 exclude: |
     (?x)
+    ^CHANGELOG\.md$|
     ^README\.md$|
     # Repos using Sphinx to generate docs don't need prettying
     ^docs/_templates/.*\.html$|

@@ -3,6 +3,7 @@ requires = ["poetry-core>=1.2.0,<=1.9.0", "poetry-dynamic-versioning>=1.0.0,<2.0
 build-backend = "poetry_dynamic_versioning.backend"
 
 [project]
+name = "aiogram-fsm-sqlitestorage"
 dynamic = [ "classifiers", "version" ]
 
 [project.urls]
@@ -12,7 +13,7 @@ repository = "https://github.com/Katulos/aiogram-fsm-sqlitestorage"
 
 [tool.poetry]
 name = "aiogram-fsm-sqlitestorage"
-version = "0.1.0"
+version = "0.0.0"
 description = "aiogram FSM storage, stores all data in SQLite database."
 keywords = ["aiogram", "storage", "sqlite", "fsm"]
 authors = [
@@ -59,7 +60,83 @@ mypy = "^1.11.2"
 pre-commit = "^3.5.0"
 ruff = "^0.5.1"
 
-[tool.poetry-dynamic-versioning]
-enable = true
-vcs = "git"
-style = "semver"
+[tool.semantic_release]
+version_variables = [
+    "sqlitestorage/__init__.py:__version__"
+]
+version_toml = [
+    "pyproject.toml:tool.poetry.version"
+]
+assets = []
+build_command = "pip install poetry && poetry build"
+build_command_env = []
+commit_message = "chore(release): v{version} [skip ci]"
+commit_parser = "conventional"
+logging_use_named_masks = false
+major_on_zero = true
+allow_zero_version = true
+no_git_verify = false
+tag_format = "v{version}"
+upload_to_repository  = true
+upload_to_release = true
+
+[tool.semantic_release.branches.main]
+match = "(main|master)"
+prerelease_token = "rc"
+prerelease = false
+
+[tool.semantic_release.changelog]
+mode = "init"
+insertion_flag = "<!-- version list -->"
+exclude_commit_patterns = [
+  '''chore(?:\([^)]*?\))?: .+''',
+  '''ci(?:\([^)]*?\))?: .+''',
+  '''refactor(?:\([^)]*?\))?: .+''',
+  '''style(?:\([^)]*?\))?: .+''',
+  '''test(?:\([^)]*?\))?: .+''',
+  '''build\((?!deps\): .+)''',
+  '''Merged? .*''',
+]
+
+[tool.semantic_release.changelog.default_templates]
+changelog_file = "CHANGELOG.md"
+output_format = "md"
+mask_initial_release = false
+
+[tool.semantic_release.changelog.environment]
+block_start_string = "{%"
+block_end_string = "%}"
+variable_start_string = "{{"
+variable_end_string = "}}"
+comment_start_string = "{#"
+comment_end_string = "#}"
+trim_blocks = false
+lstrip_blocks = false
+newline_sequence = "\n"
+keep_trailing_newline = false
+extensions = []
+autoescape = false
+
+[tool.semantic_release.commit_author]
+env = "GIT_COMMIT_AUTHOR"
+default = "Katulos <katulos@protonmail.com>"
+
+[tool.semantic_release.commit_parser_options]
+minor_tags = ["feat"]
+patch_tags = ["fix", "perf"]
+other_allowed_tags = ["build", "chore", "ci", "docs", "style", "refactor", "test"]
+allowed_tags = ["feat", "fix", "perf", "build", "chore", "ci", "docs", "style", "refactor", "test"]
+default_bump_level = 0
+parse_squash_commits = false
+ignore_merge_commits = false
+
+[tool.semantic_release.remote]
+name = "origin"
+type = "github"
+token = { env = "GH_TOKEN" }
+ignore_token_for_push = false
+insecure = false
+
+[tool.semantic_release.publish]
+dist_glob_patterns = ["dist/*"]
+upload_to_vcs_release = true

@@ -3,18 +3,27 @@ name: Develop
 on:
   push:
     branches:
-      - develop
       - dev
+      - develop
+    paths:
+      - "**/*.py"
+      - ".github/workflows/develop.yml"
+  pull_request:
+    branches:
+      - dev
+      - develop
+    paths:
+      - "**/*.py"
+      - ".github/workflows/develop.yml"
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"] # quotation marks are mandatory
-    env:
-      PYTHONUSING_COVERAGE: "3.8"
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     steps:
       - name: Checkout sources
@@ -32,24 +41,3 @@ jobs:
       - name: Run tests
         run: |
           make test
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    if: github.repository_owner == 'Katulos'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-
-      - name: Release
-        uses: cycjimmy/semantic-release-action@v3
-        with:
-          semantic_version: 18
-          extra_plugins: |
-            @semantic-release/changelog
-            @semantic-release/git
-            conventional-changelog-conventionalcommits
-        env:
-          GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
