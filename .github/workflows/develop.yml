@@ -1,3 +1,4 @@
+# triger
 name: Develop
 
 on:
@@ -41,3 +42,30 @@ jobs:
       - name: Run tests
         run: |
           make test
+<<<<<<< HEAD
+=======
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    if: github.repository_owner == 'Katulos'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Release
+        uses: cycjimmy/semantic-release-action@v3
+        with:
+          semantic_version: 18
+          extra_plugins: |
+            @semantic-release/changelog
+            @semantic-release/git
+            conventional-changelog-conventionalcommits
+        env:
+          GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+>>>>>>> 7bd8798 (ci: Test semantic-release)
