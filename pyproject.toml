@@ -84,7 +84,7 @@ exclude_lines = [
 
 [tool.semantic_release]
 version_variables = [
-    "sqlitestorage/__init__.py:__version__"
+    "aiogram_fsm_sqlitestorage/__init__.py:__version__"
 ]
 version_toml = [
     "pyproject.toml:tool.poetry.version"
