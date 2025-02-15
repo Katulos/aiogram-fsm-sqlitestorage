@@ -29,13 +29,12 @@ deps: clean # Install dependencies
 
 .PHONY: test
 test:  # Run tests
-	pytest --cov=sqlitestorage --cov-config .coveragerc tests/
+	pytest --cov=aiogram-fsm-sqlitestorage --cov-config .coveragerc tests/
 
 .PHONY: test-coverage
 test-coverage:  # Run tests with coverage
 	mkdir -p $(reports_dir)/tests/
-	pytest --cov=aiogram --cov-config .coveragerc --html=$(reports_dir)/tests/index.html tests/
-	coverage html -d $(reports_dir)/coverage
+	pytest --cov=aiogram-fsm-sqlitestorage --cov-config .coveragerc --html=$(reports_dir)/tests/index.html tests/
 	coverage html -d $(reports_dir)/coverage
 
 
