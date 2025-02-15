@@ -11,9 +11,6 @@
 > When it was necessary for my project, I did not find such projects as [osf4/sqlitestorage](https://github.com/osf4/sqlitestorage) or [sashaferrum/aiogram_sqlite_storage](https://github.com/sashaferrum/aiogram_sqlite_storage) :sob: and adapted [this fork](https://github.com/LehaSex/SQLiteStorage) to my needs.
 > More forks to the God of forks! :laughing:
 
-> [!CAUTION]
-> This package may conflict with the packages listed above! Be careful!
-
 Simple aiogram FSM storage, stores all FSM data in SQLite database
 
 Intended to replace `MemoryStorage` for simple cases where you want to keep states between bot restarts.
@@ -40,7 +37,7 @@ Include the following in your script:
 
 ```python
 # import aiogram and the rest
-from sqlitestorage import SQLiteStorage
+from aiogram_fsm_sqlitestorage import SQLiteStorage
 
 dp = Dispatcher(bot, storage=SQLiteStorage())
 ```
