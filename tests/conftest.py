@@ -5,7 +5,7 @@ from typing import AsyncGenerator
 import pytest
 from aiogram.fsm.storage.base import StorageKey
 
-from sqlitestorage.storage import SQLiteStorage
+from aiogram_fsm_sqlitestorage import SQLiteStorage
 from tests.mocked_bot import MockedBot
 
 CHAT_ID = -42
