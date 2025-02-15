@@ -23,8 +23,9 @@ clean: # Clean up
 
 .PHONY: deps
 deps: clean # Install dependencies
-	pip install -e ."[dev,test]" -U --upgrade-strategy=eager
-	pre-commit install
+	pip install -r requirements-test.txt
+	# pip install -e ."[dev,test]" -U --upgrade-strategy=eager
+	# pre-commit install
 
 .PHONY: test
 test:  # Run tests
