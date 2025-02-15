@@ -1,31 +1,43 @@
 .DEFAULT_GOAL := help
 .PHONY: deps help test
 
+tests_dir := tests
+examples_dir := examples
+code_dir := $(package_dir) $(tests_dir) $(examples_dir)
+reports_dir := htmlcov
+
 help: # Show help for each of the Makefile recipes.
 	@grep -E '^[a-zA-Z0-9 -]+:.*#'  Makefile | sort | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m:$$(echo $$l | cut -f 2- -d'#')\n"; done
 
-clean: clean-build clean-pyc clean-test
+.PHONY: clean
+clean: # Clean up
+	rm -rf `find . -name __pycache__`
+	rm -f `find . -type f -name '*.py[co]' `
+	rm -f `find . -type f -name '*~' `
+	rm -f `find . -type f -name '.*~' `
+	rm -rf `find . -name .pytest_cache`
+	rm -rf *.egg-info
+	rm -f report.html
+	rm -f .coverage
+	rm -rf {build,dist,site,.cache,.mypy_cache,.ruff_cache,reports}
 
-clean-build:
-	rm -fr build
-	rm -fr dist
-	rm -fr .eggs
-	rm -fr .ruff_cache
-	rm -fr .mypy_cache
-	find . -name '*.egg-info' -exec rm -fr {} +
-	find . -name '*.egg' -exec rm -f {} +
+.PHONY: deps
+deps: clean # Install dependencies
+	pip install -e ."[dev,test]" -U --upgrade-strategy=eager
+	pre-commit install
 
-clean-pyc:
-	find . -name '*.pyc' -exec rm -f {} +
-	find . -name '*.pyo' -exec rm -f {} +
-	find . -name '*~' -exec rm -f {} +
-	find . -name '__pycache__' -exec rm -fr {} +
-
-clean-test:
-	rm -fr .pytest_cache
-
-deps:  # Install dependencies
-	python -m pip install -r requirements-test.txt
-
+.PHONY: test
 test:  # Run tests
-	pytest
+	pytest --cov=sqlitestorage --cov-config .coveragerc tests/
+
+.PHONY: test-coverage
+test-coverage:  # Run tests with coverage
+	mkdir -p $(reports_dir)/tests/
+	pytest --cov=aiogram --cov-config .coveragerc --html=$(reports_dir)/tests/index.html tests/
+	coverage html -d $(reports_dir)/coverage
+	coverage html -d $(reports_dir)/coverage
+
+
+.PHONY: build
+build: clean # Build package
+	poetry build

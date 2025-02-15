@@ -4,7 +4,13 @@ import sqlite3
 from typing import Any, Dict, Optional, Tuple, Union
 
 from aiogram.fsm.state import State
-from aiogram.fsm.storage.base import BaseStorage, StateType, StorageKey
+from aiogram.fsm.storage.base import (
+    BaseStorage,
+    DefaultKeyBuilder,
+    KeyBuilder,
+    StateType,
+    StorageKey,
+)
 
 logging.basicConfig(level=logging.INFO)
 
@@ -16,9 +22,16 @@ class SQLiteStorage(BaseStorage):
     between bot restarts.
     """
 
-    def __init__(self, db_path: str = "fsm_storage.db"):
+    def __init__(
+        self,
+        db_path: str = "fsm_storage.db",
+        key_builder: Optional[KeyBuilder] = None,
+    ):
+        if key_builder is None:
+            key_builder = DefaultKeyBuilder(with_destiny=True)
         self.db_path: str = db_path
         self._conn: Optional[sqlite3.Connection] = None
+        self._key_builder = key_builder
         self._init_db()
 
     def _init_db(self) -> None:
@@ -40,7 +53,8 @@ class SQLiteStorage(BaseStorage):
         if self._conn is None:
             try:
                 self._conn = sqlite3.connect(self.db_path)
-            except sqlite3.Error:
+            except sqlite3.Error as e:
+                logging.error(e)
                 return None
         return self._conn
 
@@ -54,7 +68,7 @@ class SQLiteStorage(BaseStorage):
             raise RuntimeError(
                 "The connection to the database was not established.",
             )
-        key_str = f"{key.chat_id}:{key.user_id}"
+        key_str = self._key_builder.build(key)
         resolved_state = self.resolve_state(
             state,
         )
@@ -71,6 +85,7 @@ class SQLiteStorage(BaseStorage):
                     (key_str, resolved_state, key_str),
                 )
         except sqlite3.Error as e:
+            logging.error(e)
             raise RuntimeError(f"Error executing query: {e}") from e
 
     async def get_state(self, key: StorageKey) -> Optional[str]:
@@ -80,18 +95,21 @@ class SQLiteStorage(BaseStorage):
                 "The connection to the database was not established.",
             )
 
+        key_str = self._key_builder.build(key)
+
         try:
             with conn:
                 cursor = conn.cursor()
                 cursor.execute(
                     "SELECT state FROM fsm_data WHERE key = ?",
-                    (f"{key.chat_id}:{key.user_id}",),
+                    (key_str,),
                 )
                 result: Optional[Tuple[Any, ...]] = cursor.fetchone()
                 state: Optional[str] = (
                     result[0] if result and result[0] else None
                 )
         except sqlite3.Error as e:
+            logging.error(e)
             raise RuntimeError(f"Error executing query: {e}") from e
 
         return state
@@ -107,12 +125,18 @@ class SQLiteStorage(BaseStorage):
                 "The connection to the database was not established.",
             )
 
-        key_str = f"{key.chat_id}:{key.user_id}"
+        key_str = self._key_builder.build(key)
         data_json = json.dumps(data)
 
         try:
             with conn:
                 cursor = conn.cursor()
+                if not data:
+                    cursor.execute(
+                        "DELETE FROM fsm_data WHERE key = ?",
+                        (key_str,),
+                    )
+                    return
                 cursor.execute(
                     """
                     INSERT OR REPLACE INTO fsm_data (key, state, data)
@@ -121,6 +145,7 @@ class SQLiteStorage(BaseStorage):
                     (key_str, key_str, data_json),
                 )
         except sqlite3.Error as e:
+            logging.error(e)
             raise RuntimeError(f"Error executing query: {e}") from e
 
     async def get_data(self, key: StorageKey) -> Dict[str, Any]:
@@ -130,7 +155,7 @@ class SQLiteStorage(BaseStorage):
                 "The connection to the database was not established.",
             )
 
-        key_str = f"{key.chat_id}:{key.user_id}"
+        key_str = self._key_builder.build(key)
 
         try:
             with conn:
@@ -141,6 +166,7 @@ class SQLiteStorage(BaseStorage):
                 )
                 result: Optional[Tuple[Any, ...]] = cursor.fetchone()
         except sqlite3.Error as e:
+            logging.error(e)
             raise RuntimeError(f"Error executing query: {e}") from e
 
         if result:
@@ -163,7 +189,8 @@ class SQLiteStorage(BaseStorage):
         try:
             conn.execute("SELECT 1")
             return False
-        except sqlite3.ProgrammingError:
+        except sqlite3.ProgrammingError as e:
+            logging.error(e)
             return True
 
     @staticmethod

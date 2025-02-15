@@ -1,5 +1,8 @@
 exclude = [
+    "*.egg-info",
     '*.pyi',
+    "build",
+    "dist",
     '.tox',
     '.git',
     'venv',
