@@ -111,13 +111,13 @@ prerelease = false
 mode = "init"
 insertion_flag = "<!-- version list -->"
 exclude_commit_patterns = [
-#  '''chore(?:\([^)]*?\))?: .+''',
-#  '''ci(?:\([^)]*?\))?: .+''',
-#  '''refactor(?:\([^)]*?\))?: .+''',
-#  '''style(?:\([^)]*?\))?: .+''',
-#  '''test(?:\([^)]*?\))?: .+''',
-#  '''build\((?!deps\): .+)''',
-#  '''Merged? .*''',
+  '''chore(?:\([^)]*?\))?: .+''',
+  '''ci(?:\([^)]*?\))?: .+''',
+  '''refactor(?:\([^)]*?\))?: .+''',
+  '''style(?:\([^)]*?\))?: .+''',
+  '''test(?:\([^)]*?\))?: .+''',
+  '''build\((?!deps\): .+)''',
+  '''Merged? .*''',
 ]
 
 [tool.semantic_release.changelog.default_templates]
